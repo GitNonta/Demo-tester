@@ -27,6 +27,7 @@ button.ghost { background: transparent; color: var(--muted); border-color: var(-
 .columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .column { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; min-height: 200px; }
 .column h2 { margin: 0 0 12px; font-size: 1rem; color: var(--muted); }
+.empty { margin: 0; color: var(--muted); font-size: 0.9rem; }
 .task { border: 1px solid var(--line); border-radius: 6px; padding: 10px; margin-bottom: 8px; }
 .task p { margin: 0 0 8px; }
 .actions { display: flex; gap: 8px; }

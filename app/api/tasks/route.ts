@@ -3,6 +3,8 @@ import { addTask, listTasks, removeTask, updateStatus, Status } from "@/lib/task
 
 export const dynamic = "force-dynamic";
 
+const STATUSES: Status[] = ["todo", "doing", "done"];
+
 export async function GET() {
   return NextResponse.json(listTasks());
 }
@@ -17,6 +19,9 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   const { id, status } = (await req.json()) as { id: number; status: Status };
+  if (!STATUSES.includes(status)) {
+    return NextResponse.json({ error: "สถานะไม่ถูกต้อง" }, { status: 400 });
+  }
   const updated = updateStatus(id, status);
   if (!updated) return NextResponse.json({ error: "ไม่พบงาน" }, { status: 404 });
   return NextResponse.json(updated);

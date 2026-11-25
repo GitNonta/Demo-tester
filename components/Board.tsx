@@ -22,16 +22,7 @@ export default function Board() {
     load();
   }, []);
 
-  const add = async () => {
-    if (!title.trim()) return;
-    await fetch("/api/tasks", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title }),
-    });
-    setTitle("");
-    load();
-  };
+  
 
   const move = async (id: number, status: Status) => {
     await fetch("/api/tasks", {

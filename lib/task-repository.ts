@@ -1,4 +1,4 @@
-import type { Status } from "@/lib/tasks";
+import { listTasks, type Status } from "@/lib/tasks";
 import {
   type CreateTaskInput,
   type TaskEvent,
@@ -148,7 +148,7 @@ function buildSeedTasks(now: number): TaskRecord[] {
     const completedAt =
       seed.status === "done" ? createdAt + Math.round(day * 0.5) : null;
     return {
-      id: index + 1,
+      id: 1001 + index,
       title: seed.title,
       status: seed.status,
       priority: seed.priority,
@@ -197,8 +197,42 @@ export class TaskRepository {
     return () => this.listeners.delete(listener);
   }
 
+  /**
+   * ดึงงานที่ถูกสร้างผ่าน store เดิม (lib/tasks.ts) เข้ามาในที่เก็บนี้
+   * ทำให้หน้า /insights เห็นงานชุดเดียวกับหน้าหลัก
+   */
+  syncLegacy(): void {
+    const now = Date.now();
+    for (const legacy of listTasks()) {
+      if (this.tasks.has(legacy.id)) continue;
+      this.tasks.set(legacy.id, {
+        id: legacy.id,
+        title: legacy.title,
+        status: legacy.status,
+        priority: "normal",
+        tags: [],
+        assignee: null,
+        dueDate: null,
+        createdAt: now,
+        updatedAt: now,
+        completedAt: legacy.status === "done" ? now : null,
+        deletedAt: null,
+      });
+      this.nextTaskId = Math.max(this.nextTaskId, legacy.id + 1);
+      this.events.push({
+        id: this.nextEventId++,
+        taskId: legacy.id,
+        type: "created",
+        at: now,
+        actor: DEFAULT_ACTOR,
+        detail: `สร้างงาน "${legacy.title}" จากหน้าหลัก`,
+      });
+    }
+  }
+
   /** คืนงานทั้งหมด เรียงจากเวลาอัปเดตล่าสุด */
   all(options: { includeDeleted?: boolean } = {}): TaskRecord[] {
+    this.syncLegacy();
     const tasks = [...this.tasks.values()];
     const filtered = options.includeDeleted
       ? tasks
@@ -208,6 +242,7 @@ export class TaskRepository {
 
   /** หางานตาม id คืน undefined ถ้าไม่พบหรือถูกลบแล้ว */
   find(id: number, options: { includeDeleted?: boolean } = {}): TaskRecord | undefined {
+    this.syncLegacy();
     const task = this.tasks.get(id);
     if (!task) return undefined;
     if (!options.includeDeleted && task.deletedAt !== null) return undefined;

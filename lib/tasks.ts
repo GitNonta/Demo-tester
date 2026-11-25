@@ -30,3 +30,11 @@ export function updateStatus(id: number, status: Status): Task | undefined {
 export function removeTask(id: number) {
   tasks = tasks.filter((t) => t.id !== id);
 }
+
+/** นับจำนวนงานแยกตามสถานะ ใช้สรุปบนหน้าเว็บ/API */
+export function countByStatus(): Record<Status, number> {
+  return tasks.reduce<Record<Status, number>>(
+    (acc, t) => ({ ...acc, [t.status]: acc[t.status] + 1 }),
+    { todo: 0, doing: 0, done: 0 },
+  );
+}

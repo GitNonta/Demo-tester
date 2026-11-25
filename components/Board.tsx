@@ -68,6 +68,9 @@ export default function Board() {
         {COLUMNS.map((col) => (
           <section key={col.key} className="column">
             <h2>{col.label}</h2>
+            {tasks.filter((t) => t.status === col.key).length === 0 && (
+              <p className="empty">ยังไม่มีงาน</p>
+            )}
             {tasks
               .filter((t) => t.status === col.key)
               .map((t) => (
